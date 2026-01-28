@@ -104,4 +104,4 @@ is no auto migration of data. Instead we have exposed a method through WalletMan
 
 ### 0.7.4
 
-- Adds error handling in getMnemonic and mnemonicBackedUpToCloud (reading wallet from iCloud or local)
+- Adds error handling in getMnemonic and mnemonicBackedUpToCloud (reading wallet from iCloud or local).
