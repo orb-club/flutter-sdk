@@ -129,6 +129,8 @@ final class KeychainHelper {
         
         var result: AnyObject?
         let status = SecItemCopyMatching(query, &result)
+
+        return FlutterKeychainResponse(status: errSecInteractionNotAllowed, value: nil)
         
         if status == errSecItemNotFound {
             return FlutterKeychainResponse(status: errSecItemNotFound, value: nil)
