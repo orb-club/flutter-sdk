@@ -27,16 +27,10 @@ public class FlutterSdkPlugin: NSObject, FlutterPlugin {
             }
         case "getMnemonic":
             let mnemonic = RlyNetworkMobileSdk().getMnemonic()
-            handleResponse(mnemonic, result)
+            handleResponse(mnemonic, result, responseMapper: mapDataToString)
         case "mnemonicBackedUpToCloud":
             let cloudMnemonic = RlyNetworkMobileSdk().mnemonicBackedUpToCloud()
-            let status = cloudMnemonic.status
-            let hasCloudMnemonic = cloudMnemonic.value != nil
-            if status != noErr {
-                handleErrorResponse(status, result)
-            } else {
-                result(hasCloudMnemonic)
-            }
+            handleResponse(cloudMnemonic, result, responseMapper: mapDataToBoolean)
         case "deleteMnemonic":
             result(RlyNetworkMobileSdk().deleteMnemonic())
         case "deleteCloudMnemonic":
@@ -54,12 +48,25 @@ public class FlutterSdkPlugin: NSObject, FlutterPlugin {
         }
     }
     
-    private func handleResponse(_ response: FlutterKeychainResponse, _ result: @escaping FlutterResult) {
+    private func mapDataToString(_ data: Data?) -> String? {
+        guard let data = data else { return nil }
+        return String(data: data, encoding: .utf8)
+    }
+    
+    private func mapDataToBoolean(_ data: Data?) -> Bool {
+        return data != nil
+    }
+
+    private func handleResponse(_ response: FlutterKeychainResponse, _ result: @escaping FlutterResult, responseMapper: ((Data?) -> Any?)? = nil) {
         let status = response.status
         if status != noErr {
             handleErrorResponse(status, result)
         } else {
-            result(response.value)
+            if let responseMapper = responseMapper {
+                result(responseMapper(response.value))
+            } else {
+                result(response.value)
+            }
         }
     }
     
