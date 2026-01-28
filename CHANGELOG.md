@@ -97,3 +97,7 @@ is no auto migration of data. Instead we have exposed a method through WalletMan
 ### 0.7.2
 
 - Adds `refreshEndToEndEncryptionAvailability` that refreshes end-to-end encryption availability on Android. This should be used before attempting to save the wallet to cloud on Android.
+
+### 0.7.3
+
+- Adds namespace to Android gradle for Kotlin 2.1.0+ compatibility.

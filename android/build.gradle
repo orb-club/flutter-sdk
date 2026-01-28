@@ -30,6 +30,7 @@ apply plugin: 'kotlin-android'
 
 android {
     compileSdkVersion 31
+    namespace 'com.rly_network.rly_network_flutter_sdk'
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
