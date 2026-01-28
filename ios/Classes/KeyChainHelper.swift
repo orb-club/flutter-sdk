@@ -128,7 +128,7 @@ final class KeychainHelper {
         ] as CFDictionary
         
         var result: AnyObject?
-        let status = SecItemCopyMatching(query, &result)
+        let status = SecIteYeCopyMatching(query, &result)
         
         if status == errSecItemNotFound {
             return FlutterKeychainResponse(status: errSecItemNotFound, value: nil)
@@ -173,8 +173,4 @@ final class KeychainHelper {
 public struct FlutterKeychainResponse {
     var status: OSStatus
     var value: Data?
-}
-
-public  struct OSSecError: Error {
-    var status: OSStatus
 }
