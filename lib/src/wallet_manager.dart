@@ -155,7 +155,9 @@ class WalletManager {
 
   Future<void> _saveMnemonic(String mnemonic,
       {required bool overwrite, KeyStorageConfig? storageOptions}) async {
-    final existingWallet = await getWallet();
+    final existingWallet =
+        await getWallet().onError((error, stackTrace) => null);
+
     if (existingWallet != null && !overwrite) {
       throw 'Wallet already exists. Use overwrite flag to overwrite';
     }
