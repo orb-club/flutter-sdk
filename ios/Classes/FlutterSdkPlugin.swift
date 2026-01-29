@@ -59,7 +59,7 @@ public class FlutterSdkPlugin: NSObject, FlutterPlugin {
 
     private func handleResponse(_ response: FlutterKeychainResponse, _ result: @escaping FlutterResult, responseMapper: ((Data?) -> Any?)? = nil) {
         let status = response.status
-        if status != noErr {
+        if status != noErr && status != errSecItemNotFound {
             handleErrorResponse(status, result)
         } else {
             if let responseMapper = responseMapper {

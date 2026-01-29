@@ -102,6 +102,6 @@ is no auto migration of data. Instead we have exposed a method through WalletMan
 
 - Adds namespace to Android gradle for Kotlin 2.1.0+ compatibility.
 
-### 0.7.4
+### 0.7.5
 
 - Adds error handling in getMnemonic and mnemonicBackedUpToCloud (reading wallet from iCloud or local).
