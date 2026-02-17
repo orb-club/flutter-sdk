@@ -40,7 +40,8 @@ public class FlutterSdkPlugin: NSObject, FlutterPlugin {
                let mnemonicToSave = arguments["mnemonic"] as? String,
                let saveToCloud = arguments["saveToCloud"] as? Bool,
                let rejectOnCloudSaveFailure = arguments["rejectOnCloudSaveFailure"] as? Bool {
-                result(RlyNetworkMobileSdk().saveMnemonic(mnemonicToSave, saveToCloud: saveToCloud, rejectOnCloudSaveFailure: rejectOnCloudSaveFailure))
+                let response = RlyNetworkMobileSdk().saveMnemonic(mnemonicToSave, saveToCloud: saveToCloud, rejectOnCloudSaveFailure: rejectOnCloudSaveFailure)
+                handleResponse(response, result, responseMapper: { _ in true })
             }
             
         default:

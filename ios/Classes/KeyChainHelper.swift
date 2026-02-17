@@ -9,11 +9,11 @@ final class KeychainHelper {
         service: String,
         account: String,
         saveToCloud: Bool
-    ) {
+    ) -> OSStatus {
         if saveToCloud {
-            saveToiCloudKeychain(data, service: service, account: account)
+            return saveToiCloudKeychain(data, service: service, account: account)
         } else {
-            saveToDeviceKeychain(data, service: service, account: account)
+            return saveToDeviceKeychain(data, service: service, account: account)
         }
     }
     
@@ -21,7 +21,7 @@ final class KeychainHelper {
         _ data: Data,
         service: String,
         account: String
-    ) {
+    ) -> OSStatus {
         let query = [
             kSecValueData: data,
             kSecAttrService: service,
@@ -30,31 +30,33 @@ final class KeychainHelper {
             kSecClass: kSecClassGenericPassword,
             kSecAttrAccessible: kSecAttrAccessibleWhenUnlocked,
         ] as CFDictionary
-        
+
         // Add data in query to keychain
         let status = SecItemAdd(query, nil)
-        
+
         if status == errSecDuplicateItem {
             // Item already exist, thus update it.
-            let query = [
+            let updateQuery = [
                 kSecAttrService: service,
                 kSecAttrAccount: account,
                 kSecAttrSynchronizable: true,
                 kSecClass: kSecClassGenericPassword,
             ] as CFDictionary
-            
+
             let attributesToUpdate = [kSecValueData: data] as CFDictionary
-            
+
             // Update existing item
-            SecItemUpdate(query, attributesToUpdate)
+            return SecItemUpdate(updateQuery, attributesToUpdate)
         }
+
+        return status
     }
     
     func saveToDeviceKeychain(
         _ data: Data,
         service: String,
         account: String
-    ) {
+    ) -> OSStatus {
         let query = [
             kSecValueData: data,
             kSecAttrService: service,
@@ -62,36 +64,47 @@ final class KeychainHelper {
             kSecClass: kSecClassGenericPassword,
             kSecAttrAccessible: kSecAttrAccessibleWhenUnlockedThisDeviceOnly,
         ] as CFDictionary
-        
+
         // Add data in query to keychain
         let status = SecItemAdd(query, nil)
-        
+
         if status == errSecDuplicateItem {
             // Item already exist, thus update it.
-            let query = [
+            let updateQuery = [
                 kSecAttrService: service,
                 kSecAttrAccount: account,
                 kSecClass: kSecClassGenericPassword,
             ] as CFDictionary
-            
+
             let attributesToUpdate = [kSecValueData: data] as CFDictionary
-            
+
             // Update existing item
-            SecItemUpdate(query, attributesToUpdate)
+            return SecItemUpdate(updateQuery, attributesToUpdate)
         }
+
+        return status
     }
     
     func read(service: String, account: String) -> FlutterKeychainResponse {
         let iCloudResult = readFromiCloudKeychain(service: service, account: account)
-        let iCloudStatus = iCloudResult.status
-        let iCloudData = iCloudResult.value
-        
-        // Return success or error data, skip "not found" state.
-        if iCloudStatus != errSecItemNotFound {
+
+        // Return success data and migrate to device keychain for reliability.
+        if iCloudResult.status == errSecSuccess, let data = iCloudResult.value {
+            // Migrate iCloud wallet to device keychain for reliability.
+            // Only remove from iCloud after confirming device save succeeded.
+            let deviceSaveStatus = saveToDeviceKeychain(data, service: service, account: account)
+            if deviceSaveStatus == noErr {
+                deleteFromiCloudKeychain(service: service, account: account)
+            }
             return iCloudResult
         }
-        
-        // If not found, look at the device keychain.
+
+        // Return error data, skip "not found" state.
+        if iCloudResult.status != errSecItemNotFound {
+            return iCloudResult
+        }
+
+        // If not found in iCloud, look at the device keychain.
         let localData = readFromDeviceKeychain(service: service, account: account)
         return localData
     }
