@@ -105,3 +105,7 @@ is no auto migration of data. Instead we have exposed a method through WalletMan
 ### 0.7.5
 
 - Adds error handling in getMnemonic and mnemonicBackedUpToCloud (reading wallet from iCloud or local).
+
+### 0.7.6
+
+- Fix: save error propagation (throw error to Dart if saving fails instead of failing silently); respect rejectOnCloudSaveFailure flag on iOS - fallback to device keychain when false; migrate existing iCloud keychain wallets to device keychain due to issues with iCloud sync state.

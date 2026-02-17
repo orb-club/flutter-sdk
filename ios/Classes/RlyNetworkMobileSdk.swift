@@ -47,14 +47,26 @@ public class RlyNetworkMobileSdk: NSObject {
         _ mnemonic: String,
         saveToCloud: Bool,
         rejectOnCloudSaveFailure: Bool
-    ) -> Bool {
-        KeychainHelper.standard.save(
-            mnemonic.data(using: .utf8)!,
+    ) -> FlutterKeychainResponse {
+        let data = mnemonic.data(using: .utf8)!
+        let status = KeychainHelper.standard.save(
+            data,
             service: SERVICE_KEY,
             account: MNEMONIC_ACCOUNT_KEY,
             saveToCloud: saveToCloud
-        );
-        return true
+        )
+
+        if saveToCloud && status != noErr && !rejectOnCloudSaveFailure {
+            let deviceStatus = KeychainHelper.standard.save(
+                data,
+                service: SERVICE_KEY,
+                account: MNEMONIC_ACCOUNT_KEY,
+                saveToCloud: false
+            )
+            return FlutterKeychainResponse(status: deviceStatus, value: nil)
+        }
+
+        return FlutterKeychainResponse(status: status, value: nil)
     }
     
     public func deleteMnemonic() -> Bool {
